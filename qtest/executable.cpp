@@ -59,12 +59,12 @@ void setQTestOptions(ISettings* settings, QStringList& argv)
 int Executable::s_count = 0;
 
 Executable::Executable()
-    :     m_timer(new QTimer(this)),
-          m_parserTimeout(new QTimer(this)),
-          m_proc(0),
+    :     m_settings(0),
           m_output(0),
+          m_proc(0),
           m_parser(0),
-          m_settings(0)
+          m_timer(new QTimer(this)),
+          m_parserTimeout(new QTimer(this))          
 {
     m_parserTimeout->setSingleShot(true);
     m_parserTimeout->setInterval(150);
@@ -99,8 +99,8 @@ QStringList Executable::fetchFunctions()
 {
     ASSERT_SANE_LOCATION
 
-    if (!QFile::exists(m_location.path())) {
-        kError() << "Test executable " << m_location.path()
+    if (!QFile::exists(m_location.toLocalFile())) {
+        kError() << "Test executable " << m_location.toLocalFile()
                  << " does not exist. Failed to retrieve test functions.";
         return QStringList();
     }
@@ -314,7 +314,7 @@ void setLDLibDir(KProcess* qTestExe, ISettings* settings)
             if (spl.size() == 2) currentLDLib = spl[1];
         }
     }
-    QString newLDLib = cmakeLibDir.path();
+    QString newLDLib = cmakeLibDir.toLocalFile();
     if (!currentLDLib.isEmpty()) newLDLib += ':' + currentLDLib;
     qTestExe->setEnv("LD_LIBRARY_PATH", newLDLib);
     kDebug() << newLDLib;
@@ -341,7 +341,7 @@ void Executable::executeProc()
 {
     QString dir = QDir::currentPath();
     QDir::setCurrent(m_location.directory());
-    kDebug() << "Executing " << m_proc->program() << " [ " << m_location.path() << " ]";
+    kDebug() << "Executing " << m_proc->program() << " [ " << m_location.toLocalFile() << " ]";
     ///m_proc->setStandardOutputFile(m_stdOutFilePath);
     m_proc->setStandardErrorFile(m_stdErrFilePath, QIODevice::Append);
     //m_parser->setDevice(m_proc);
