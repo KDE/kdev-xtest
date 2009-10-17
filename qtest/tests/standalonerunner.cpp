@@ -21,7 +21,7 @@
 #include "standalonerunner.h"
 #include "../xmlregister.h"
 
-#include <veritas/runnertesthelper.h>
+#include <veritas/tests/runnertesthelper.h>
 
 #include <QFile>
 #include <QMainWindow>

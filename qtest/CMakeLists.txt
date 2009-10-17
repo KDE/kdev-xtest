@@ -4,6 +4,8 @@ add_subdirectory(tests)
 add_definitions( ${KDE4_ENABLE_EXCEPTIONS} )
 add_definitions( -DKDE_DEFAULT_DEBUG_AREA=9003 )
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 set(kdevqtest_SRCS
     qtestoutputparser.cpp
     qtestmodelitems.cpp
@@ -25,7 +27,7 @@ kde4_add_ui_files(kdevqtest_SRCS
 qt4_automoc(${kdevqtest_SRCS})
 kde4_add_library(kdevqtest SHARED ${kdevqtest_SRCS})
 target_link_libraries(kdevqtest
-    ${KDEVPLATFORM_VERITAS_LIBRARY}
+    ${KDEVVERITAS_LIBRARY}
     ${KDEVPLATFORM_INTERFACES_LIBRARY}
     ${KDEVPLATFORM_OUTPUTVIEW_LIBRARY}
     ${KDEVPLATFORM_PROJECT_LIBRARY}
@@ -44,7 +46,7 @@ kde4_add_plugin(kdevqtestview ${kdevqtestview_SRCS})
 target_link_libraries(kdevqtestview
     kdevqtest
     ${QT_QTCORE_LIBRARY}
-    ${KDEVPLATFORM_PROJECT_LIBRARY} ${KDEVPLATFORM_INTERFACES_LIBRARY} ${KDEVPLATFORM_VERITAS_LIBRARY}
+    ${KDEVPLATFORM_PROJECT_LIBRARY} ${KDEVPLATFORM_INTERFACES_LIBRARY} ${KDEVVERITAS_LIBRARY}
     ${KDE4_KDECORE_LIBS}
     ${KDE4_KTEXTEDITOR_LIBS}
     ${KDE4_KPARTS_LIBS})

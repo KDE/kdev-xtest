@@ -1,6 +1,8 @@
 
 add_subdirectory(tests)
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 set(veritasconfig_SRCS
     configmodule.cpp configwidget.cpp)
 qt4_automoc(${veritasconfig_SRCS})
