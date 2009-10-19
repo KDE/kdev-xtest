@@ -3,8 +3,16 @@ Type=Service
 Icon=kdevelop
 Exec=blubb
 Comment=QTestLib test runner
+Comment[pt]=Execução de testes do QTestLib
+Comment[sv]=Testkörning för QTestLib
+Comment[uk]=Засіб запуску QTestLib
+Comment[x-test]=xxQTestLib test runnerxx
 
 Name=QTest Runner
+Name[pt]=Execução do QTest
+Name[sv]=Körning för QTest
+Name[uk]=Засіб запуску QTest
+Name[x-test]=xxQTest Runnerxx
 GenericName=Unit test runner
 GenericName[ca]=Llançador de prova Unit
 GenericName[de]=Unittest ausführen
