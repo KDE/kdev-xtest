@@ -11,8 +11,8 @@ kde4_add_ui_files(veritasconfig_SRCS veritasconfig.ui)
 kde4_add_plugin(kcm_kdev_veritassettings ${veritasconfig_SRCS} )
 target_link_libraries(kcm_kdev_veritassettings
     ${KDE4_KIO_LIBS}
-    ${KDEVPLATFORM_INTERFACES_LIBRARY}
-    ${KDEVPLATFORM_PROJECT_LIBRARY})
+    ${KDEVPLATFORM_INTERFACES_LIBRARIES}
+    ${KDEVPLATFORM_PROJECT_LIBRARIES})
 install(
     TARGETS kcm_kdev_veritassettings
     DESTINATION ${PLUGIN_INSTALL_DIR} )
