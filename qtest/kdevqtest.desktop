@@ -5,12 +5,14 @@ Exec=blubb
 Comment=QTestLib test runner
 Comment[pt]=Execução de testes do QTestLib
 Comment[sv]=Testkörning för QTestLib
+Comment[tr]=QTestLib sınaması çalıştırıcı
 Comment[uk]=Засіб запуску QTestLib
 Comment[x-test]=xxQTestLib test runnerxx
 
 Name=QTest Runner
 Name[pt]=Execução do QTest
 Name[sv]=Körning för QTest
+Name[tr]=QTest Çalıştırıcı
 Name[uk]=Засіб запуску QTest
 Name[x-test]=xxQTest Runnerxx
 GenericName=Unit test runner
