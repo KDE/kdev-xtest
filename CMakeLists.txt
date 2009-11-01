@@ -1,4 +1,5 @@
 project(XtestPlugin)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${XtestPlugin_SOURCE_DIR}/cmake/)
 
 find_package(KDE4 REQUIRED)
 
