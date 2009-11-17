@@ -4,6 +4,7 @@ Icon=kdevelop
 Exec=blubb
 Comment=QTestLib test runner
 Comment[en_GB]=QTestLib test runner
+Comment[es]=Lanzador de pruebas QTestLib
 Comment[pt]=Execução de testes do QTestLib
 Comment[sv]=Testkörning för QTestLib
 Comment[tr]=QTestLib sınaması çalıştırıcı
@@ -12,6 +13,7 @@ Comment[x-test]=xxQTestLib test runnerxx
 
 Name=QTest Runner
 Name[en_GB]=QTest Runner
+Name[es]=Lanzador de QTest
 Name[pt]=Execução do QTest
 Name[sv]=Körning för QTest
 Name[tr]=QTest Çalıştırıcı
