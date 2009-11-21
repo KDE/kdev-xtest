@@ -2,14 +2,14 @@ project(XtestPlugin)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${XtestPlugin_SOURCE_DIR}/cmake/)
 
 find_package(KDE4 REQUIRED)
-
 find_package(KDevPlatform REQUIRED)
+
+include(KDE4Defaults)
+
 include_directories(
     ${KDEVPLATFORM_INCLUDE_DIR}
     ${KDE4_INCLUDES}
     ${KDE4_INCLUDE_DIR}/threadweaver
-    ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}
 )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
