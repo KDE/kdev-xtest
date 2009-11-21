@@ -19,7 +19,7 @@
  */
 
 #include "qtestoutputmorphertest.h"
-#include "xtest/qtest/qtestoutputmorpher.h"
+#include "../qtestoutputmorpher.h"
 #include <kasserts.h>
 #include <qtest_kde.h>
 

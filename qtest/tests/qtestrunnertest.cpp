@@ -34,7 +34,7 @@
 
 #include <veritas/test.h>
 #include <veritas/testresult.h>
-#include <veritas/runnertesthelper.h>
+#include <veritas/tests/runnertesthelper.h>
 
 using Veritas::RunnerTestHelper;
 using QTest::QTestRunnerTest;
