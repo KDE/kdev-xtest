@@ -1,6 +1,7 @@
 /* KDevelop xUnit plugin
  *
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2009 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -81,10 +82,9 @@ private:
     void iterateTestFunctions();
     void processTestFunction();
     void processMessage();
-    void processQAssert();
-    void processQSkip();
+    void processDescription();
+    void processDescriptionForQAssert();
     void fillResult();
-    void setFailure();
     void setSuccess();
 
     inline bool isStartElement_(const QString& elem);
@@ -98,7 +98,8 @@ private:
     
 private:
     // remember state to continue parsing
-    enum State { Main = 0, TestFunction = 1, Failure = 2, Message = 3, QSkip = 4, QAssert = 5 };
+    enum State { Main = 0, TestFunction = 1, Failure = 2, Message = 3, QSkip = 4, QAssert = 5, 
+                 ExpectedFailure = 6, UnexpectedPass = 7 };
     State m_state;
     bool m_buzzy;
     Veritas::TestResult* m_result;
@@ -118,6 +119,8 @@ private:    // some xml constants
     static const QString c_line;
     static const QString c_pass;
     static const QString c_fail;
+    static const QString c_xfail;
+    static const QString c_xpass;
     static const QString c_qfatal;
     static const QString c_skip;
     static const QString c_initTestCase;

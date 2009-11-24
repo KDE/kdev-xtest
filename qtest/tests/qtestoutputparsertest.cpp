@@ -1,6 +1,7 @@
 /* KDevelop xUnit plugin
  *
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2009 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -589,6 +590,238 @@ void OutputParserTest::failureAndAssertInSingleCommand()
     delete result1; delete result2; delete result3;
 }
 
+// test command
+void OutputParserTest::expectedFailure()
+{
+    QByteArray input =
+        QTEST_HEADER_XML
+        QTEST_INITTESTCASE_XML
+        "<TestFunction name=\"command\">\n"
+            "<Incident type=\"xfail\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<Description><![CDATA[expected failure comment]]></Description>\n"
+            "</Incident>\n"
+        "</TestFunction>\n"
+        QTEST_CLEANUPTESTCASE_XML
+        QTEST_FOOTER_XML;
+    initParser(input, m_caze);
+
+    createTestCommand(m_command1Info, m_caze, "command");
+    setExpectedResult(m_command1Info, Veritas::RunInfo, "/path/to/file.cpp", 100, "expected failure comment");
+
+    m_parser->go();
+
+    assertParsed(m_command1Info);
+    checkResult(m_command1Info);
+}
+
+// test command
+void OutputParserTest::expectedFailureAndExpectedFailureInSingleCommand()
+{
+    // More than one expected failure in a single test function.
+    // The parser should add these as individual sub-TestResults on 
+    // the Command's TestResult
+    // You can trigger this behaviour in QTestLib with several QEXPECT_FAIL in
+    // the same method.
+
+    QByteArray input =
+        QTEST_HEADER_XML
+        QTEST_INITTESTCASE_XML
+        "<TestFunction name=\"command\">\n"
+            "<Incident type=\"xfail\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<Description><![CDATA[expected failure comment]]></Description>\n"
+            "</Incident>\n"
+            "<Incident type=\"xfail\" file=\"/path/to/file.cpp\" line=\"103\">\n"
+            "<Description><![CDATA[another expected failure comment]]></Description>\n"
+            "</Incident>\n"
+        "</TestFunction>\n"
+        QTEST_CLEANUPTESTCASE_XML
+        QTEST_FOOTER_XML;
+    initParser(input, m_caze);
+
+    createTestCommand(m_command1Info, m_caze, "command");
+    TestResult result1;
+    result1.setMessage("expected failure comment");
+    result1.setLine(100);
+    result1.setFile(KUrl("/path/to/file.cpp"));
+    result1.setState(Veritas::RunInfo);
+
+    TestResult result2;
+    result2.setMessage("another expected failure comment");
+    result2.setLine(103);
+    result2.setFile(KUrl("/path/to/file.cpp"));
+    result2.setState(Veritas::RunInfo);
+
+    m_parser->go();
+
+    assertParsed(m_command1Info);
+    KOMPARE(Veritas::RunInfo, m_command1Info.test->state()); // overal test state should be RunInfo
+    assertNrofSubResultsEquals(2, m_command1Info.test);
+    assertSubResultEquals(0, m_command1Info.test, &result1);
+    assertSubResultEquals(1, m_command1Info.test, &result2);
+}
+
+// test command
+void OutputParserTest::expectedFailureAndFailureInSingleCommand()
+{
+    // A failure after an expected failure in a single test function.
+    // The parser should add these as individual sub-TestResults on 
+    // the Command's TestResult
+    // You can trigger this behaviour in QTestLib with QVERIFY/QCOMPARE after
+    // the QVERIFY/QCOMPARE expected to fail by QEXPECT_FAIL.
+    
+    QByteArray input =
+        QTEST_HEADER_XML
+        QTEST_INITTESTCASE_XML
+        "<TestFunction name=\"command\">\n"
+            "<Incident type=\"xfail\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<Description><![CDATA[expected failure comment]]></Description>\n"
+            "</Incident>\n"
+            "<Incident type=\"fail\" file=\"/path/to/file.cpp\" line=\"103\">\n"
+            "<Description><![CDATA[failure message]]></Description>\n"
+            "</Incident>\n"
+        "</TestFunction>\n"
+        QTEST_CLEANUPTESTCASE_XML
+        QTEST_FOOTER_XML;
+    initParser(input, m_caze);
+
+    createTestCommand(m_command1Info, m_caze, "command");
+    TestResult result1;
+    result1.setMessage("expected failure comment");
+    result1.setLine(100);
+    result1.setFile(KUrl("/path/to/file.cpp"));
+    result1.setState(Veritas::RunInfo);
+
+    TestResult result2;
+    result2.setMessage("failure message");
+    result2.setLine(103);
+    result2.setFile(KUrl("/path/to/file.cpp"));
+    result2.setState(Veritas::RunError);
+
+    m_parser->go();
+
+    assertParsed(m_command1Info);
+    KOMPARE(Veritas::RunError, m_command1Info.test->state()); // overal test state should be RunError
+    assertNrofSubResultsEquals(2, m_command1Info.test);
+    assertSubResultEquals(0, m_command1Info.test, &result1);
+    assertSubResultEquals(1, m_command1Info.test, &result2);
+}
+
+// test command
+void OutputParserTest::unexpectedPass()
+{
+    QByteArray input =
+        QTEST_HEADER_XML
+        QTEST_INITTESTCASE_XML
+        "<TestFunction name=\"command\">\n"
+            "<Incident type=\"xpass\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<Description><![CDATA[failure message]]></Description>\n"
+            "</Incident>\n"
+        "</TestFunction>\n"
+        QTEST_CLEANUPTESTCASE_XML
+        QTEST_FOOTER_XML;
+    initParser(input, m_caze);
+
+    createTestCommand(m_command1Info, m_caze, "command");
+    setExpectedResult(m_command1Info, Veritas::RunError, "/path/to/file.cpp", 100, "Expected failure: failure message");
+
+    m_parser->go();
+
+    assertParsed(m_command1Info);
+    checkResult(m_command1Info);
+}
+
+// test command
+void OutputParserTest::unexpectedPassAndUnexpectedPassInSingleCommand()
+{
+    // More than one unexpected pass in a single test function.
+    // The parser should add these as individual sub-TestResults on 
+    // the Command's TestResult
+    // You can trigger this behaviour in QTestLib with several QEXPECT_FAIL
+    // using "Continue" mode in the same method.
+
+    QByteArray input =
+        QTEST_HEADER_XML
+        QTEST_INITTESTCASE_XML
+        "<TestFunction name=\"command\">\n"
+            "<Incident type=\"xpass\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<Description><![CDATA[failure message]]></Description>\n"
+            "</Incident>\n"
+            "<Incident type=\"xpass\" file=\"/path/to/file.cpp\" line=\"103\">\n"
+            "<Description><![CDATA[another failure message]]></Description>\n"
+            "</Incident>\n"
+        "</TestFunction>\n"
+        QTEST_CLEANUPTESTCASE_XML
+        QTEST_FOOTER_XML;
+    initParser(input, m_caze);
+
+    createTestCommand(m_command1Info, m_caze, "command");
+    TestResult result1;
+    result1.setMessage("Expected failure: failure message");
+    result1.setLine(100);
+    result1.setFile(KUrl("/path/to/file.cpp"));
+    result1.setState(Veritas::RunError);
+
+    TestResult result2;
+    result2.setMessage("Expected failure: another failure message");
+    result2.setLine(103);
+    result2.setFile(KUrl("/path/to/file.cpp"));
+    result2.setState(Veritas::RunError);
+
+    m_parser->go();
+
+    assertParsed(m_command1Info);
+    KOMPARE(Veritas::RunError, m_command1Info.test->state()); // overal test state should be RunError
+    assertNrofSubResultsEquals(2, m_command1Info.test);
+    assertSubResultEquals(0, m_command1Info.test, &result1);
+    assertSubResultEquals(1, m_command1Info.test, &result2);
+}
+
+// test command
+void OutputParserTest::unexpectedPassAndExpectedFailureInSingleCommand()
+{
+    // An expected failure after an unexpected pass in a single test function.
+    // The parser should add these as individual sub-TestResults on 
+    // the Command's TestResult
+    // You can trigger this behaviour in QTestLib with QEXPECT_FAIL using
+    // "Continue" followed by another QEXPECT_FAIL in the same method.
+
+    QByteArray input =
+        QTEST_HEADER_XML
+        QTEST_INITTESTCASE_XML
+        "<TestFunction name=\"command\">\n"
+            "<Incident type=\"xpass\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<Description><![CDATA[failure message]]></Description>\n"
+            "</Incident>\n"
+            "<Incident type=\"xfail\" file=\"/path/to/file.cpp\" line=\"103\">\n"
+            "<Description><![CDATA[expected failure comment]]></Description>\n"
+            "</Incident>\n"
+        "</TestFunction>\n"
+        QTEST_CLEANUPTESTCASE_XML
+        QTEST_FOOTER_XML;
+    initParser(input, m_caze);
+
+    createTestCommand(m_command1Info, m_caze, "command");
+    TestResult result1;
+    result1.setMessage("Expected failure: failure message");
+    result1.setLine(100);
+    result1.setFile(KUrl("/path/to/file.cpp"));
+    result1.setState(Veritas::RunError);
+
+    TestResult result2;
+    result2.setMessage("expected failure comment");
+    result2.setLine(103);
+    result2.setFile(KUrl("/path/to/file.cpp"));
+    result2.setState(Veritas::RunInfo);
+
+    m_parser->go();
+
+    assertParsed(m_command1Info);
+    KOMPARE(Veritas::RunError, m_command1Info.test->state()); // overal test state should be RunError
+    assertNrofSubResultsEquals(2, m_command1Info.test);
+    assertSubResultEquals(0, m_command1Info.test, &result1);
+    assertSubResultEquals(1, m_command1Info.test, &result2);
+}
+
 
 void OutputParserTest::assertNrofSubResultsEquals(int expected, Veritas::Test* t)
 {
@@ -687,9 +920,9 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
     delete cazeInfo;
     int nrofCommands = (rand() % maxCommands) + 1;
 
-    int nrofSuccess = 0, nrofFailures = 0, nrofSkipSingle = 0, nrofSkipAll = 0, nrofAsserts = 0;
+    int nrofSuccess = 0, nrofFailures = 0, nrofSkipSingle = 0, nrofSkipAll = 0, nrofAsserts = 0, nrofExpectedFailures = 0, nrofUnexpectedPasses = 0;
     for (int i=0; i<nrofCommands; i++) {
-        int type = rand() % 7;
+        int type = rand() % 9;
         TestInfo* cmdInfo = new TestInfo;
         createTestCommand(*cmdInfo, caze, QString("command%1").arg(i));
         parserInput += "<TestFunction name=\"command" + QString::number(i).toLatin1() + "\">\n";
@@ -736,6 +969,22 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
                 "</Incident>\n";
             nrofAsserts++;
             break;
+        case 7: // expected failure
+            setExpectedResult(*cmdInfo, Veritas::RunInfo, "/path/to/xfailfile.cpp", 23, "expected failure comment");
+            parserInput +=
+                "<Incident type=\"xfail\" file=\"/path/to/xfailfile.cpp\" line=\"23\">\n"
+                    "<Description><![CDATA[expected failure comment]]></Description>\n"
+                "</Incident>\n";
+            nrofExpectedFailures++;
+            break;
+        case 8: // unexpected pass
+            setExpectedResult(*cmdInfo, Veritas::RunError, "/path/to/xpassfile.cpp", 42, "Expected failure: failure message");
+            parserInput +=
+                "<Incident type=\"xpass\" file=\"/path/to/xpassfile.cpp\" line=\"42\">\n"
+                    "<Description><![CDATA[failure message]]></Description>\n"
+                "</Incident>\n";
+            nrofUnexpectedPasses++;
+            break;
         default: ;
         }
         parserInput += "</TestFunction>\n";
@@ -748,7 +997,8 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
 
     m_randomTestType += "[success:" + QString::number(nrofSuccess) + ";failures:" + QString::number(nrofFailures) +
                         ";skipsingle:" + QString::number(nrofSkipSingle) + ";skipall:" + QString::number(nrofSkipAll) +
-                        ";asserts:" + QString::number(nrofAsserts) + "]\n";
+                        ";asserts:" + QString::number(nrofAsserts) + ";expected failures:" + QString::number(nrofExpectedFailures) +
+                        ";unexpected passes:" + QString::number(nrofUnexpectedPasses) + "]\n";
 }
 
 namespace {

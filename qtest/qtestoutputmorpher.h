@@ -1,6 +1,7 @@
 /* KDevelop xUnit plugin
  *
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2009 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -71,6 +72,7 @@ private:    // some xml constants
     static const QString c_pass;
     static const QString c_fail;
     static const QString c_xfail;
+    static const QString c_xpass;
     static const QString c_initTestCase;
     static const QString c_cleanupTestCase;
     static const QString c_name;

@@ -1,6 +1,7 @@
 /* KDevelop xUnit plugin
  *
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2009 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -67,6 +68,12 @@ private slots:
     void qassertx();
     void multipleResultsInSingleCommand();
     void failureAndAssertInSingleCommand();
+    void expectedFailure();
+    void expectedFailureAndExpectedFailureInSingleCommand();
+    void expectedFailureAndFailureInSingleCommand();
+    void unexpectedPass();
+    void unexpectedPassAndUnexpectedPassInSingleCommand();
+    void unexpectedPassAndExpectedFailureInSingleCommand();
 
 private:
     struct TestInfo;

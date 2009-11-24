@@ -1,6 +1,7 @@
 /* KDevelop xUnit plugin
  *
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2009 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -57,6 +58,7 @@ const QString OutputMorpher::c_pass("pass");
 const QString OutputMorpher::c_message("Message");
 const QString OutputMorpher::c_fail("fail");
 const QString OutputMorpher::c_xfail("xfail");
+const QString OutputMorpher::c_xpass("xpass");
 const QString OutputMorpher::c_initTestCase("initTestCase");
 const QString OutputMorpher::c_cleanupTestCase("cleanupTestCase");
 const QString OutputMorpher::c_name("name");
@@ -218,6 +220,8 @@ void OutputMorpher::processIncident(const QByteArray& cmdName)
         line.append("FAIL!  : ");
     } else if (type == c_xfail) {
         line.append("XFAIL!  : ");
+    } else if (type == c_xpass) {
+        line.append("XPASS!  : ");
     }
     line.append(m_testCaseName);
     line.append("::");

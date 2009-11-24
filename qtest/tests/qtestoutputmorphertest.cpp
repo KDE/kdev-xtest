@@ -1,6 +1,7 @@
 /* KDevelop xUnit plugin
  *
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2009 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -211,6 +212,24 @@ QByteArray expectedFailureOutput =
     "PASS   : FooTest::cleanupTestCase()\n"
     "********* Finished testing of FooTest *********\n";
 
+QByteArray unexpectedPassInput =
+    QTEST_XML_HEADER
+    QTEST_XML_INITTESTCASE
+    "<TestFunction name=\"foo\">\n"
+    "<Incident type=\"xpass\" file=\"/path/to/footest.cpp\" line=\"66\">\n"
+    "<Description><![CDATA[failure message]]></Description>\n"
+    "</Incident>\n"
+    "</TestFunction>\n"
+    QTEST_XML_CLEANUPTESTCASE
+    QTEST_XML_FOOTER
+QByteArray unexpectedPassOutput =
+    "********* Started testing of FooTest *********\n"
+    "PASS   : FooTest::initTestCase()\n"
+    "XPASS!  : FooTest::foo() failure message\n"
+    "   Loc: [/path/to/footest.cpp(66)]\n"
+    "PASS   : FooTest::cleanupTestCase()\n"
+    "********* Finished testing of FooTest *********\n";
+
 void OutputMorpherTest::parse_data()
 {
     QTest::addColumn<QByteArray>("input");
@@ -225,6 +244,7 @@ void OutputMorpherTest::parse_data()
     QTest::newRow("multiple_commands") << multiCommandsInput << multiCommandsOutput;
     QTest::newRow("assert_failure") << assertFailureInput << assertFailureOutput;
     QTest::newRow("expected_failure") << expectedFailureInput << expectedFailureOutput;
+    QTest::newRow("unexpected_pass") << unexpectedPassInput << unexpectedPassOutput;
 }
 
 

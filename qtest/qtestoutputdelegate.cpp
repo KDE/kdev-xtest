@@ -2,6 +2,7 @@
  *   This file is part of KDevelop                                         *
  *   Copyright (C) 2007 Andreas Pakulat <apaku@gmx.de>                     *
  *   Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>                 *
+ *   Copyright 2009 Daniel Calviño Sánchez <danxuliu@gmail.com>            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -38,7 +39,7 @@ void QTestOutputDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
     QString text = index.data().toString();
     if (text.startsWith("PASS") || text.startsWith("XFAIL") || text.startsWith("QSKIP")) {
         opt.palette.setBrush(QPalette::Text, passBrush.brush(option.palette));
-    } else if (text.startsWith("FAIL") || text.startsWith("QFATAL")) {
+    } else if (text.startsWith("FAIL") || text.startsWith("XPASS") || text.startsWith("QFATAL")) {
         opt.palette.setBrush(QPalette::Text, errorBrush.brush(option.palette));
     } else {
         opt.palette.setBrush(QPalette::Text, textBrush.brush(option.palette));
