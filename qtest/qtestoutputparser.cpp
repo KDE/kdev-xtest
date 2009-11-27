@@ -88,51 +88,6 @@ void OutputParser::fto_resetResultMemoryLeakStats()
     g_result_constructed = g_result_assigned = g_result_destructed = 0;
 }
 
-void OutputParser::deleteResult()
-{
-    if (m_result) {
-        delete m_result;
-        m_result = 0;
-        g_result_destructed++;
-    }
-}
-
-void OutputParser::newResult()
-{
-    if (!m_result) {
-        m_result = new TestResult;
-        g_result_constructed++;
-    }
-}
-
-void OutputParser::setResult(Test* test)
-{
-    Q_ASSERT(m_result);
-    if (m_subResults.isEmpty()) {
-        test->setResult(m_result);
-    } else {
-        TestResult* result = new TestResult;
-        test->setResult(result);
-        TestState state = m_result->state();
-        foreach(TestResult* sub, m_subResults) {
-            if (sub->state() == Veritas::RunError) {
-                state = Veritas::RunError;
-            } else if (sub->state() == Veritas::RunFatal) {
-                state = Veritas::RunFatal;
-                break;
-            }
-        }
-        result->setState(state);
-        foreach(TestResult* sub, m_subResults) {
-            result->appendChild(sub);
-        }
-        result->appendChild(m_result);
-    }
-    m_result = 0;
-    m_subResults.clear();
-    g_result_assigned++;
-}
-
 OutputParser::OutputParser()
     : m_state(TestCase),
       m_buzzy(false),
@@ -146,6 +101,12 @@ OutputParser::~OutputParser()
     deleteResult();
 }
 
+void OutputParser::setCase(Case* caze)
+{
+    Q_ASSERT(caze);
+    m_case = caze;
+}
+
 void OutputParser::reset()
 {
     m_case = 0;
@@ -155,34 +116,6 @@ void OutputParser::reset()
     m_state = TestCase;
     m_block = false;
     m_ignoreNextIncident = false;
-}
-
-bool OutputParser::isStartElement_(const QString& elementName)
-{
-    return isStartElement() && (name() == elementName);
-}
-
-bool OutputParser::isEndElement_(const QString& elementName)
-{
-    return isEndElement() && (name() == elementName);
-}
-
-void OutputParser::assertDeviceSet()
-{
-    Q_ASSERT_X(device(), "OutputParser::go()",
-               "Illegal usage. Client classes should set a QIODevice*, with setDevice().");
-}
-
-void OutputParser::assertCaseSet()
-{
-    Q_ASSERT_X(m_case, "OutputParser::go()",
-               "Illegal usage. TestCase should have been set, with setCase().");
-}
-
-void OutputParser::setCase(Case* caze)
-{
-    Q_ASSERT(caze);
-    m_case = caze;
 }
 
 void OutputParser::block()
@@ -243,14 +176,21 @@ void OutputParser::go()
     m_buzzy = false;
 }
 
-bool OutputParser::fixtureFailed(const QString& cmd)
+void OutputParser::assertDeviceSet()
 {
-    if (cmd != c_initTestCase && cmd != c_cleanupTestCase) {
-        return false;
-    } else {
-        return m_result->state() != Veritas::NoResult &&
-               m_result->state() != Veritas::RunSuccess;
-    }
+    Q_ASSERT_X(device(), "OutputParser::go()",
+               "Illegal usage. Client classes should set a QIODevice*, with setDevice().");
+}
+
+void OutputParser::assertCaseSet()
+{
+    Q_ASSERT_X(m_case, "OutputParser::go()",
+               "Illegal usage. TestCase should have been set, with setCase().");
+}
+
+void OutputParser::processTestCaseEnd()
+{
+    emit done();
 }
 
 void OutputParser::processTestFunctionStart()
@@ -268,9 +208,97 @@ void OutputParser::processTestFunctionStart()
     if (m_cmd) m_cmd->signalStarted();
 }
 
-void OutputParser::processTestCaseEnd()
+void OutputParser::processTestFunctionEnd()
 {
-    emit done();
+    if (m_state != TestFunction) {
+        return;
+    }
+    m_state = TestCase;
+
+    if (m_cmd) {
+        setResult(m_cmd);
+        m_cmd->signalFinished();
+    } else if (fixtureFailed(m_cmdName)) {
+        kDebug() << "init/cleanup TestCase failed";
+        m_case->signalStarted();
+        setResult(m_case);
+        m_case->signalFinished();
+    }
+}
+
+void OutputParser::processMessageStart()
+{
+    if (m_state != TestFunction) {
+        return;
+    }
+    m_state = Message;
+
+    QString type = attributes().value(c_type).toString();
+    if (type == c_skip) {
+        clearResult();
+        m_result->setFile(KUrl(attributes().value(c_file).toString()));
+        m_result->setLine(attributes().value(c_line).toString().toInt());
+        m_result->setState(Veritas::RunInfo);
+        m_descriptionType = QSkip;
+    } else if (type == c_qfatal) {
+        clearResult();
+        m_result->setState(Veritas::RunFatal);
+        m_descriptionType = QAssert;
+        m_ignoreNextIncident = true;
+    }
+}
+
+void OutputParser::processMessageEnd()
+{
+    if (m_state != Message) {
+        return;
+    }
+    m_state = TestFunction;
+}
+
+void OutputParser::processIncidentStart()
+{
+    if (m_state != TestFunction) {
+        return;
+    }
+    m_state = Incident;
+  
+    if (m_ignoreNextIncident) {
+        return;
+    }
+
+    QString type = attributes().value(c_type).toString();
+    if (type == c_pass) {
+        setSuccess();
+    } else if (type == c_xfail) {
+        clearResult();
+        m_result->setState(Veritas::RunInfo);
+        m_result->setFile(KUrl(attributes().value(c_file).toString()));
+        m_result->setLine(attributes().value(c_line).toString().toInt());
+        m_descriptionType = ExpectedFailure;
+    } else if (type == c_xpass) {
+        clearResult();
+        m_result->setState(Veritas::RunError);
+        m_result->setFile(KUrl(attributes().value(c_file).toString()));
+        m_result->setLine(attributes().value(c_line).toString().toInt());
+        m_descriptionType = UnexpectedPass;
+    } else if (type == c_fail) {
+        clearResult();
+        m_result->setState(Veritas::RunError);
+        m_result->setFile(KUrl(attributes().value(c_file).toString()));
+        m_result->setLine(attributes().value(c_line).toString().toInt());
+        m_descriptionType = Failure;
+    }
+}
+
+void OutputParser::processIncidentEnd()
+{
+    if (m_state != Incident) {
+        return;
+    }
+    m_state = TestFunction;
+
+    m_ignoreNextIncident = false;
 }
 
 void OutputParser::processDescriptionEnd()
@@ -315,44 +343,76 @@ void OutputParser::setDescriptionForQAssert()
     m_result->setMessage(m_cdataText.mid(0, fileStart));
 }
 
-void OutputParser::processMessageStart()
+void OutputParser::setSuccess()
 {
-    if (m_state != TestFunction) {
-        return;
-    }
-    m_state = Message;
-
-    QString type = attributes().value(c_type).toString();
-    if (type == c_skip) {
-        clearResult();
-        m_result->setFile(KUrl(attributes().value(c_file).toString()));
-        m_result->setLine(attributes().value(c_line).toString().toInt());
-        m_result->setState(Veritas::RunInfo);
-        m_descriptionType = QSkip;
-    } else if (type == c_qfatal) {
-        clearResult();
-        m_result->setState(Veritas::RunFatal);
-        m_descriptionType = QAssert;
-        m_ignoreNextIncident = true;
+    if (m_result->state() != Veritas::RunInfo) {
+        m_result->setState(Veritas::RunSuccess);
     }
 }
 
-void OutputParser::processTestFunctionEnd()
+bool OutputParser::isStartElement_(const QString& elementName)
 {
-    if (m_state != TestFunction) {
-        return;
-    }
-    m_state = TestCase;
+    return isStartElement() && (name() == elementName);
+}
 
-    if (m_cmd) {
-        setResult(m_cmd);
-        m_cmd->signalFinished();
-    } else if (fixtureFailed(m_cmdName)) {
-        kDebug() << "init/cleanup TestCase failed";
-        m_case->signalStarted();
-        setResult(m_case);
-        m_case->signalFinished();
+bool OutputParser::isEndElement_(const QString& elementName)
+{
+    return isEndElement() && (name() == elementName);
+}
+
+bool OutputParser::fixtureFailed(const QString& cmd)
+{
+    if (cmd != c_initTestCase && cmd != c_cleanupTestCase) {
+        return false;
+    } else {
+        return m_result->state() != Veritas::NoResult &&
+               m_result->state() != Veritas::RunSuccess;
     }
+}
+
+void OutputParser::deleteResult()
+{
+    if (m_result) {
+        delete m_result;
+        m_result = 0;
+        g_result_destructed++;
+    }
+}
+
+void OutputParser::newResult()
+{
+    if (!m_result) {
+        m_result = new TestResult;
+        g_result_constructed++;
+    }
+}
+
+void OutputParser::setResult(Test* test)
+{
+    Q_ASSERT(m_result);
+    if (m_subResults.isEmpty()) {
+        test->setResult(m_result);
+    } else {
+        TestResult* result = new TestResult;
+        test->setResult(result);
+        TestState state = m_result->state();
+        foreach(TestResult* sub, m_subResults) {
+            if (sub->state() == Veritas::RunError) {
+                state = Veritas::RunError;
+            } else if (sub->state() == Veritas::RunFatal) {
+                state = Veritas::RunFatal;
+                break;
+            }
+        }
+        result->setState(state);
+        foreach(TestResult* sub, m_subResults) {
+            result->appendChild(sub);
+        }
+        result->appendChild(m_result);
+    }
+    m_result = 0;
+    m_subResults.clear();
+    g_result_assigned++;
 }
 
 void OutputParser::clearResult()
@@ -361,66 +421,6 @@ void OutputParser::clearResult()
         m_subResults << m_result;
         m_result = new TestResult;
     }
-}
-
-void OutputParser::processIncidentStart()
-{
-    if (m_state != TestFunction) {
-        return;
-    }
-    m_state = Incident;
-  
-    if (m_ignoreNextIncident) {
-        return;
-    }
-
-    QString type = attributes().value(c_type).toString();
-    if (type == c_pass) {
-        setSuccess();
-    } else if (type == c_xfail) {
-        clearResult();
-        m_result->setState(Veritas::RunInfo);
-        m_result->setFile(KUrl(attributes().value(c_file).toString()));
-        m_result->setLine(attributes().value(c_line).toString().toInt());
-        m_descriptionType = ExpectedFailure;
-    } else if (type == c_xpass) {
-        clearResult();
-        m_result->setState(Veritas::RunError);
-        m_result->setFile(KUrl(attributes().value(c_file).toString()));
-        m_result->setLine(attributes().value(c_line).toString().toInt());
-        m_descriptionType = UnexpectedPass;
-    } else if (type == c_fail) {
-        clearResult();
-        m_result->setState(Veritas::RunError);
-        m_result->setFile(KUrl(attributes().value(c_file).toString()));
-        m_result->setLine(attributes().value(c_line).toString().toInt());
-        m_descriptionType = Failure;
-    }
-}
-
-void OutputParser::setSuccess()
-{
-    if (m_result->state() != Veritas::RunInfo) {
-        m_result->setState(Veritas::RunSuccess);
-    }
-}
-
-void OutputParser::processMessageEnd()
-{
-    if (m_state != Message) {
-        return;
-    }
-    m_state = TestFunction;
-}
-
-void OutputParser::processIncidentEnd()
-{
-    if (m_state != Incident) {
-        return;
-    }
-    m_state = TestFunction;
-
-    m_ignoreNextIncident = false;
 }
 
 #include "qtestoutputparser.moc"
