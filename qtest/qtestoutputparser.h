@@ -79,12 +79,16 @@ private:
     void assertCaseSet();
 
      // helpers
-    void iterateTestFunctions();
-    void processTestFunction();
-    void processMessage();
-    void processDescription();
-    void processDescriptionForQAssert();
-    void fillResult();
+    void processTestCaseEnd();
+    void processTestFunctionStart();
+    void processTestFunctionEnd();
+    void processMessageStart();
+    void processMessageEnd();
+    void processIncidentStart();
+    void processIncidentEnd();
+    void processDescriptionEnd();
+     
+    void setDescriptionForQAssert();
     void setSuccess();
 
     inline bool isStartElement_(const QString& elem);
@@ -98,8 +102,9 @@ private:
     
 private:
     // remember state to continue parsing
-    enum State { Main = 0, TestFunction = 1, Failure = 2, Message = 3, QSkip = 4, QAssert = 5, 
-                 ExpectedFailure = 6, UnexpectedPass = 7 };
+    enum State { TestCase = 0, TestFunction = 1, Incident = 2, Message = 3 };
+    enum DescriptionType { Failure = 0, ExpectedFailure = 1, UnexpectedPass = 2, QSkip = 3, QAssert = 4 };
+    DescriptionType m_descriptionType;
     State m_state;
     bool m_buzzy;
     Veritas::TestResult* m_result;
@@ -108,9 +113,12 @@ private:
     QString m_cmdName;
     bool m_block;
     QList<Veritas::TestResult*> m_subResults;
+    QString m_cdataText;
+    bool m_ignoreNextIncident;
 
 private:    // some xml constants
-    static const QString c_testfunction;
+    static const QString c_testCase;
+    static const QString c_testFunction;
     static const QString c_incident;
     static const QString c_description;
     static const QString c_message;
