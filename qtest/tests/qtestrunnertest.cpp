@@ -349,10 +349,8 @@ void QTestRunnerTest::multipleFailuresSingleCommand()
 }
 
 // command
-void QTestRunnerTest::tdd_expectedFailure()
+void QTestRunnerTest::expectedFailure()
 {
-    TDD_TODO;
-
     QByteArray regXML =
         "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
         "<root dir=\"\">\n"
@@ -368,14 +366,14 @@ void QTestRunnerTest::tdd_expectedFailure()
     m_runner->runTests();
 
     QStringList result1, result2, result3, result4;
-    result1 << "command" << "expectedFailure" << "expectedFailure.cpp" << "8";
-    result2 << "commandData(row2)" << "expectedFailureData" << "expectedFailure.cpp" << "15";
-    result3 << "commandData(row3)" << "expectedFailureData" << "expectedFailure.cpp" << "18";
-    result4 << "commandData(row4)" << "fail" << "expectedFailure.cpp" << "16";
+    result1 << "command" << "expectedFailure" << "expectedFailure.cpp" << "9";
+    result2 << "commandData" << "[row2] expectedFailureData1" << "expectedFailure.cpp" << "16";
+    result3 << "commandData" << "[row3] Expected failure: 'pass' returned FALSE. ()" << "expectedFailure.cpp" << "19";
+    result4 << "commandData" << "[row4] 'pass' returned FALSE. (fail)" << "expectedFailure.cpp" << "16";
     m_runner->verifyResultItems(QList<QStringList>() << result1 << result2 << result3 << result4);
 
     QMap<QString, Veritas::TestState> states;
-    states["suite1/expectedFailure/command"] = Veritas::RunSuccess;
+    states["suite1/expectedFailure/command"] = Veritas::RunInfo;
     states["suite1/expectedFailure/commandData"] = Veritas::RunError;
     m_runner->verifyTestStates(states, root);
 }

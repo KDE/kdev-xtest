@@ -86,6 +86,7 @@ private:
     void processMessageEnd();
     void processIncidentStart();
     void processIncidentEnd();
+    void processDataTagEnd();
     void processDescriptionEnd();
      
     void setDescriptionForQAssert();
@@ -103,7 +104,7 @@ private:
 private:
     // remember state to continue parsing
     enum State { TestCase = 0, TestFunction = 1, Incident = 2, Message = 3 };
-    enum DescriptionType { Failure = 0, ExpectedFailure = 1, UnexpectedPass = 2, QSkip = 3, QAssert = 4 };
+    enum DescriptionType { Failure = 0, ExpectedFailure = 1, UnexpectedPass = 2, QSkip = 3, QAssert = 4, None = 5 };
     DescriptionType m_descriptionType;
     State m_state;
     bool m_buzzy;
@@ -120,6 +121,7 @@ private:    // some xml constants
     static const QString c_testCase;
     static const QString c_testFunction;
     static const QString c_incident;
+    static const QString c_dataTag;
     static const QString c_description;
     static const QString c_message;
     static const QString c_type;

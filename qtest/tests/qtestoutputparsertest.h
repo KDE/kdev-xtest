@@ -74,6 +74,8 @@ private slots:
     void unexpectedPass();
     void unexpectedPassAndUnexpectedPassInSingleCommand();
     void unexpectedPassAndExpectedFailureInSingleCommand();
+    void multipleResultsInSingleDataDrivenCommand();
+    void skipSingleAndAssertInSingleDataDrivenCommand();
 
 private:
     struct TestInfo;

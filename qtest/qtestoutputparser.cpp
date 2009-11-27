@@ -54,6 +54,7 @@ using Veritas::TestState;
 
 const QString OutputParser::c_testCase("TestCase");
 const QString OutputParser::c_testFunction("TestFunction");
+const QString OutputParser::c_dataTag("DataTag");
 const QString OutputParser::c_description("Description");
 const QString OutputParser::c_incident("Incident");
 const QString OutputParser::c_type("type");
@@ -89,7 +90,8 @@ void OutputParser::fto_resetResultMemoryLeakStats()
 }
 
 OutputParser::OutputParser()
-    : m_state(TestCase),
+    : m_descriptionType(None),
+      m_state(TestCase),
       m_buzzy(false),
       m_result(0),
       m_block(false),
@@ -114,6 +116,7 @@ void OutputParser::reset()
     m_result = 0;
     m_buzzy = false;
     m_state = TestCase;
+    m_descriptionType = None;
     m_block = false;
     m_ignoreNextIncident = false;
 }
@@ -163,6 +166,9 @@ void OutputParser::go()
         }
         if (isEndElement_(c_incident)) {
             processIncidentEnd();
+        }
+        if (isEndElement_(c_dataTag)) {
+            processDataTagEnd();
         }
         if (isEndElement_(c_description)) {
             processDescriptionEnd();
@@ -301,6 +307,19 @@ void OutputParser::processIncidentEnd()
     m_ignoreNextIncident = false;
 }
 
+void OutputParser::processDataTagEnd()
+{
+    if (m_state != Message && m_state != Incident) {
+        return;
+    }
+  
+    if (m_state == Incident && m_ignoreNextIncident) {
+        return;
+    }
+
+    m_result->setMessage("[" + m_cdataText + "] ");
+}
+
 void OutputParser::processDescriptionEnd()
 {
     if (m_state != Message && m_state != Incident) {
@@ -312,16 +331,16 @@ void OutputParser::processDescriptionEnd()
     }
 
     if (m_descriptionType == QSkip) {
-        m_result->setMessage(m_cdataText + " (skipped)");
+        m_result->setMessage(m_result->message() + m_cdataText + " (skipped)");
     } else if (m_descriptionType == QAssert) {
         setDescriptionForQAssert();
     } else if (m_descriptionType == Failure || m_descriptionType == ExpectedFailure) {
-        m_result->setMessage(m_cdataText);
+        m_result->setMessage(m_result->message() + m_cdataText);
     } else if (m_descriptionType == UnexpectedPass) {
-        m_result->setMessage("Expected failure: " + m_cdataText);
-    } else {
-        kError() << "Unexpected state when processing the description";
+        m_result->setMessage(m_result->message() + "Expected failure: " + m_cdataText);
     }
+
+    m_descriptionType = None;
 }
 
 void OutputParser::setDescriptionForQAssert()
@@ -340,7 +359,7 @@ void OutputParser::setDescriptionForQAssert()
     }
     m_result->setFile(KUrl(m_cdataText.mid(fileEnd, lineStart - fileEnd)));
     m_result->setLine(m_cdataText.mid(lineEnd).toInt());
-    m_result->setMessage(m_cdataText.mid(0, fileStart));
+    m_result->setMessage(m_result->message() + m_cdataText.mid(0, fileStart));
 }
 
 void OutputParser::setSuccess()

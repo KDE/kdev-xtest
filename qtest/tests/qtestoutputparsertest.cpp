@@ -822,6 +822,120 @@ void OutputParserTest::unexpectedPassAndExpectedFailureInSingleCommand()
     assertSubResultEquals(1, m_command1Info.test, &result2);
 }
 
+// test command
+void OutputParserTest::multipleResultsInSingleDataDrivenCommand()
+{
+    // A failure, an expected failure and an unexpected pass depending on the
+    // data of a single test function.
+    // The parser should add these as individual sub-TestResults on 
+    // the Command's TestResult
+    // Each sub-TestResult message should contain the name of the data before
+    // the actual message
+    // You can trigger this behaviour in QTestLib using data driven testing
+
+    QByteArray input =
+        QTEST_HEADER_XML
+        QTEST_INITTESTCASE_XML
+        "<TestFunction name=\"command\">\n"
+            "<Incident type=\"xpass\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<DataTag><![CDATA[a row]]></DataTag>\n"
+            "<Description><![CDATA[failure message]]></Description>\n"
+            "</Incident>\n"
+            "<Incident type=\"xfail\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<DataTag><![CDATA[another row]]></DataTag>\n"
+            "<Description><![CDATA[expected failure comment]]></Description>\n"
+            "</Incident>\n"
+            "<Incident type=\"fail\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<DataTag><![CDATA[other row]]></DataTag>\n"
+            "<Description><![CDATA[another failure message]]></Description>\n"
+            "</Incident>\n"
+        "</TestFunction>\n"
+        QTEST_CLEANUPTESTCASE_XML
+        QTEST_FOOTER_XML;
+    initParser(input, m_caze);
+
+    createTestCommand(m_command1Info, m_caze, "command");
+    TestResult result1;
+    result1.setMessage("[a row] Expected failure: failure message");
+    result1.setLine(100);
+    result1.setFile(KUrl("/path/to/file.cpp"));
+    result1.setState(Veritas::RunError);
+
+    TestResult result2;
+    result2.setMessage("[another row] expected failure comment");
+    result2.setLine(100);
+    result2.setFile(KUrl("/path/to/file.cpp"));
+    result2.setState(Veritas::RunInfo);
+
+    TestResult result3;
+    result3.setMessage("[other row] another failure message");
+    result3.setLine(100);
+    result3.setFile(KUrl("/path/to/file.cpp"));
+    result3.setState(Veritas::RunError);
+
+    m_parser->go();
+
+    assertParsed(m_command1Info);
+    KOMPARE(Veritas::RunError, m_command1Info.test->state()); // overal test state should be RunError
+    assertNrofSubResultsEquals(3, m_command1Info.test);
+    assertSubResultEquals(0, m_command1Info.test, &result1);
+    assertSubResultEquals(1, m_command1Info.test, &result2);
+    assertSubResultEquals(2, m_command1Info.test, &result3);
+}
+
+// test command
+void OutputParserTest::skipSingleAndAssertInSingleDataDrivenCommand()
+{
+    // A skip single and an assert depending on the data of a single test
+    // function.
+    // The parser should add these as individual sub-TestResults on 
+    // the Command's TestResult
+    // Each sub-TestResult message should contain the name of the data before
+    // the actual message
+    // You can trigger this behaviour in QTestLib using data driven testing
+
+    QByteArray input =
+        QTEST_HEADER_XML
+        QTEST_INITTESTCASE_XML
+        "<TestFunction name=\"command\">\n"
+            "<Message type=\"skip\" file=\"/path/to/file.cpp\" line=\"100\">\n"
+            "<DataTag><![CDATA[a row]]></DataTag>\n"
+            "<Description><![CDATA[skipCommand]]></Description>\n"
+            "</Message>\n"
+            "<Message type=\"qfatal\" file=\"\" line=\"0\">\n"
+            "<DataTag><![CDATA[another row]]></DataTag>\n"
+            "<Description><![CDATA[ASSERT: \"condition\" in file /path/to/file.cpp, line 103]]></Description>\n"
+            "</Message>\n"
+            "<Incident type=\"fail\" file=\"Unknown file\" line=\"0\">\n"
+            "<DataTag><![CDATA[another row]]></DataTag>\n"
+            "<Description><![CDATA[Received a fatal error.]]></Description>\n"
+            "</Incident>\n"
+        "</TestFunction>\n"
+        QTEST_CLEANUPTESTCASE_XML
+        QTEST_FOOTER_XML;
+    initParser(input, m_caze);
+
+    createTestCommand(m_command1Info, m_caze, "command");
+    TestResult result1;
+    result1.setMessage("[a row] skipCommand (skipped)");
+    result1.setLine(100);
+    result1.setFile(KUrl("/path/to/file.cpp"));
+    result1.setState(Veritas::RunInfo);
+
+    TestResult result2;
+    result2.setMessage("[another row] ASSERT: \"condition\"");
+    result2.setLine(103);
+    result2.setFile(KUrl("/path/to/file.cpp"));
+    result2.setState(Veritas::RunFatal);
+
+    m_parser->go();
+
+    assertParsed(m_command1Info);
+    KOMPARE(Veritas::RunFatal, m_command1Info.test->state()); // overal test state should be RunFatal
+    assertNrofSubResultsEquals(2, m_command1Info.test);
+    assertSubResultEquals(0, m_command1Info.test, &result1);
+    assertSubResultEquals(1, m_command1Info.test, &result2);
+}
 
 void OutputParserTest::assertNrofSubResultsEquals(int expected, Veritas::Test* t)
 {
@@ -922,7 +1036,7 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
 
     int nrofSuccess = 0, nrofFailures = 0, nrofSkipSingle = 0, nrofSkipAll = 0, nrofAsserts = 0, nrofExpectedFailures = 0, nrofUnexpectedPasses = 0;
     for (int i=0; i<nrofCommands; i++) {
-        int type = rand() % 9;
+        int type = rand() % 15;
         TestInfo* cmdInfo = new TestInfo;
         createTestCommand(*cmdInfo, caze, QString("command%1").arg(i));
         parserInput += "<TestFunction name=\"command" + QString::number(i).toLatin1() + "\">\n";
@@ -941,7 +1055,16 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
                 "</Incident>\n";
             nrofFailures++;
             break;
-        case 4: // SkipSingle
+        case 4: // normal failure data driven
+            setExpectedResult(*cmdInfo, Veritas::RunError, "/path/to/file.cpp", 101, "[row1] some message");
+            parserInput +=
+                "<Incident type=\"fail\" file=\"/path/to/file.cpp\" line=\"101\">\n"
+                "    <DataTag><![CDATA[row1]]></DataTag>\n"
+                "    <Description><![CDATA[some message]]></Description>\n"
+                "</Incident>\n";
+            nrofFailures++;
+            break;
+        case 5: // SkipSingle
             setExpectedResult(*cmdInfo, Veritas::RunInfo, "/path/to/skipfile.cpp", 8, "skipCommand (skipped)");
             parserInput +=
                 "<Message type=\"skip\" file=\"/path/to/skipfile.cpp\" line=\"8\">\n"
@@ -950,7 +1073,17 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
                 "<Incident type=\"pass\" file=\"\" line=\"0\" />\n";
             nrofSkipSingle++;
             break;
-        case 5: // SkipAll ie without <Incident type='pass' />
+        case 6: // SkipSingle data driven
+            setExpectedResult(*cmdInfo, Veritas::RunInfo, "/path/to/skipfile.cpp", 15, "[row2] skipCommand (skipped)");
+            parserInput +=
+                "<Message type=\"skip\" file=\"/path/to/skipfile.cpp\" line=\"15\">\n"
+                "    <DataTag><![CDATA[row2]]></DataTag>\n"
+                "    <Description><![CDATA[skipCommand]]></Description>\n"
+                "</Message>\n"
+                "<Incident type=\"pass\" file=\"\" line=\"0\" />\n";
+            nrofSkipSingle++;
+            break;
+        case 7: // SkipAll ie without <Incident type='pass' />
             setExpectedResult(*cmdInfo, Veritas::RunInfo, "/path/to/skipfile.cpp", 9, "skipCommand (skipped)");
             parserInput +=
                 "<Message type=\"skip\" file=\"/path/to/skipfile.cpp\" line=\"9\">\n"
@@ -958,7 +1091,16 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
                 "</Message>\n";
             nrofSkipAll++;
             break;
-        case 6: // Q_ASSERT
+        case 8: // SkipAll ie without <Incident type='pass' /> data driven
+            setExpectedResult(*cmdInfo, Veritas::RunInfo, "/path/to/skipfile.cpp", 10, "[row3] skipCommand (skipped)");
+            parserInput +=
+                "<Message type=\"skip\" file=\"/path/to/skipfile.cpp\" line=\"10\">\n"
+                "    <DataTag><![CDATA[row3]]></DataTag>\n"
+                "    <Description><![CDATA[skipCommand]]></Description>\n"
+                "</Message>\n";
+            nrofSkipAll++;
+            break;
+        case 9: // Q_ASSERT
             setExpectedResult(*cmdInfo, Veritas::RunFatal, "/path/to/qassertfile.cpp", 66, "ASSERT: \"condition\"");
             parserInput +=
                 "<Message type=\"qfatal\" file=\"\" line=\"0\">\n"
@@ -969,7 +1111,20 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
                 "</Incident>\n";
             nrofAsserts++;
             break;
-        case 7: // expected failure
+        case 10: // Q_ASSERT data driven
+            setExpectedResult(*cmdInfo, Veritas::RunFatal, "/path/to/qassertfile.cpp", 67, "[row4] ASSERT: \"condition\"");
+            parserInput +=
+                "<Message type=\"qfatal\" file=\"\" line=\"0\">\n"
+                "    <DataTag><![CDATA[row4]]></DataTag>\n"
+                "    <Description><![CDATA[ASSERT: \"condition\" in file /path/to/qassertfile.cpp, line 67]]></Description>\n"
+                "</Message>\n"
+                "<Incident type=\"fail\" file=\"Unknown file\" line=\"0\">\n"
+                "    <DataTag><![CDATA[row4]]></DataTag>\n"
+                "    <Description><![CDATA[Received a fatal error.]]></Description>\n"
+                "</Incident>\n";
+            nrofAsserts++;
+            break;
+        case 11: // expected failure
             setExpectedResult(*cmdInfo, Veritas::RunInfo, "/path/to/xfailfile.cpp", 23, "expected failure comment");
             parserInput +=
                 "<Incident type=\"xfail\" file=\"/path/to/xfailfile.cpp\" line=\"23\">\n"
@@ -977,11 +1132,29 @@ void OutputParserTest::generateRandomInput(int maxCommands, QByteArray& parserIn
                 "</Incident>\n";
             nrofExpectedFailures++;
             break;
-        case 8: // unexpected pass
+        case 12: // expected failure data driven
+            setExpectedResult(*cmdInfo, Veritas::RunInfo, "/path/to/xfailfile.cpp", 24, "[row5] expected failure comment");
+            parserInput +=
+                "<Incident type=\"xfail\" file=\"/path/to/xfailfile.cpp\" line=\"24\">\n"
+                "    <DataTag><![CDATA[row5]]></DataTag>\n"
+                "    <Description><![CDATA[expected failure comment]]></Description>\n"
+                "</Incident>\n";
+            nrofExpectedFailures++;
+            break;
+        case 13: // unexpected pass
             setExpectedResult(*cmdInfo, Veritas::RunError, "/path/to/xpassfile.cpp", 42, "Expected failure: failure message");
             parserInput +=
                 "<Incident type=\"xpass\" file=\"/path/to/xpassfile.cpp\" line=\"42\">\n"
                     "<Description><![CDATA[failure message]]></Description>\n"
+                "</Incident>\n";
+            nrofUnexpectedPasses++;
+            break;
+        case 14: // unexpected pass data driven
+            setExpectedResult(*cmdInfo, Veritas::RunError, "/path/to/xpassfile.cpp", 43, "[row6] Expected failure: failure message");
+            parserInput +=
+                "<Incident type=\"xpass\" file=\"/path/to/xpassfile.cpp\" line=\"43\">\n"
+                "    <DataTag><![CDATA[row6]]></DataTag>\n"
+                "    <Description><![CDATA[failure message]]></Description>\n"
                 "</Incident>\n";
             nrofUnexpectedPasses++;
             break;

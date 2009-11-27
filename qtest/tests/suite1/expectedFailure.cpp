@@ -12,10 +12,10 @@ private slots:
     void commandData() {
         QFETCH(bool, pass);
 
-        QEXPECT_FAIL("row2", "expectedFailureData", Continue);
+        QEXPECT_FAIL("row2", "expectedFailureData1", Abort);
         QVERIFY2(pass, "fail");
 
-        QEXPECT_FAIL("row3", "expectedFailureData", Continue);
+        QEXPECT_FAIL("row3", "expectedFailureData2", Continue);
         QVERIFY(pass);
     }
 
