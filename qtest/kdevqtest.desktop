@@ -44,6 +44,6 @@ X-KDE-PluginInfo-Author=Manuel Breugelmans
 X-KDE-PluginInfo-Version=0.1
 X-KDE-PluginInfo-License=LGPL
 X-KDevelop-Interfaces=org.kdevelop.ITestFramework
-X-KDevelop-Version=7
+X-KDevelop-Version=8
 X-KDevelop-Mode=NoGUI
 X-KDevelop-Category=Global
