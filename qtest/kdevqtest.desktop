@@ -21,6 +21,7 @@ Name[uk]=Засіб запуску QTest
 Name[x-test]=xxQTest Runnerxx
 GenericName=Unit test runner
 GenericName[ca]=Llançador de prova Unit
+GenericName[ca@valencia]=Llançador de prova Unit
 GenericName[de]=Unittest ausführen
 GenericName[el]=Εκτελεστής ελέγχου unit
 GenericName[en_GB]=Unit test runner
