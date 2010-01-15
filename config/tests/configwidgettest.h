@@ -26,6 +26,7 @@
 #include <KUrl>
 
 class KUrlRequester;
+class QComboBox;
 
 namespace Veritas
 {
@@ -76,6 +77,9 @@ private:
      *  Since multiple test-exe bars are typically shown, @p fieldIndex says
      *  which one to remove. */
     void clickRemoveTestExeField(int fieldIndex) const;
+
+    /*! Returns the framework QComboBox */
+    QComboBox* frameworkComboBox() const;
 
     /*! Retrieves all the entries in the framework QComboBox */
     QStringList frameworkComboBoxContents() const;

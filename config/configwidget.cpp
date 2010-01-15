@@ -188,6 +188,13 @@ void ConfigWidget::setupButtons()
 void ConfigWidget::appendFramework(const QString& framework)
 {
     frameworkBox()->addItem(framework);
+
+    //After adding the first item in a combobox it appears as the selected item.
+    //No item should be selected in the framework combobox until the user
+    //explicitly sets it or a previous configuration is loaded.
+    if (frameworkBox()->count() == 1) {
+        frameworkBox()->setCurrentIndex(-1);
+    }
 }
 
 QToolButton* ConfigWidget::expandDetailsButton() const

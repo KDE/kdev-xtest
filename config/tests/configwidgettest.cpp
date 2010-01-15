@@ -196,6 +196,7 @@ void ConfigWidgetTest::noFrameworksComboBoxByDefault()
 
     QStringList frameworks = frameworkComboBoxContents();
     KVERIFY(frameworks.isEmpty());
+    KOMPARE(-1, frameworkComboBox()->currentIndex());
 }
 
 void ConfigWidgetTest::singleFrameworkComboBox()
@@ -206,6 +207,7 @@ void ConfigWidgetTest::singleFrameworkComboBox()
     QStringList frameworks = frameworkComboBoxContents();
     KOMPARE(1, frameworks.count());
     KOMPARE(QString("FooBar"), frameworks[0]);
+    KOMPARE(-1, frameworkComboBox()->currentIndex());
 }
 
 void ConfigWidgetTest::multipleFrameworksComboBox()
@@ -218,6 +220,7 @@ void ConfigWidgetTest::multipleFrameworksComboBox()
     KOMPARE(2, frameworks.count());
     KVERIFY(frameworks.contains("Foo"));
     KVERIFY(frameworks.contains("Bar"));
+    KOMPARE(-1, frameworkComboBox()->currentIndex());
 }
 
 void ConfigWidgetTest::executableContents()
@@ -289,6 +292,11 @@ void ConfigWidgetTest::clickAddTestExeField() const
 void ConfigWidgetTest::clickRemoveTestExeField(int fieldIndex) const
 {
     m_config->removeExecutableButton(fieldIndex)->click();
+}
+
+QComboBox* ConfigWidgetTest::frameworkComboBox() const
+{
+    return m_config->frameworkBox();
 }
 
 QStringList ConfigWidgetTest::frameworkComboBoxContents() const
