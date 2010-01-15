@@ -1,6 +1,7 @@
 /*
  * This file is part of KDevelop
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2010 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -108,26 +109,6 @@ private:
     bool m_allowUserModification;
     KUrl m_projectFolder;
     
-private:
-    friend class ConfigWidgetTest;
-
-    /*! Fakes a click on the expand details button.
-     *  For testers only. */
-    void fto_clickExpandDetails() const;
-
-    /*! Fakes a click on the add test executable button.
-     *  For testers only. */
-    void fto_clickAddTestExeField() const;
-
-    /*! Fakes a click on the remove test executable button.
-     *  Since multiple test-exe bars are typically shown, @p fieldIndex says
-     *  which one to remove.
-     *  For testers only. */
-    void fto_clickRemoveTestExeField(int fieldIndex) const;
-
-    /*! Retrieves all the entries in the framework QComboBox
-     *  For testers only. */
-    QStringList fto_frameworkComboBoxContents() const;
 };
 
 }

@@ -1,6 +1,7 @@
 /*
  * This file is part of KDevelop
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2010 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -64,6 +65,20 @@ private:
     void assertChildWidgetsDisabled();
     void assertChildWidgetsEnabled();
     KUrlRequester* fetchFirstTestExeRequester();
+
+    /*! Fakes a click on the expand details button. */
+    void clickExpandDetails() const;
+
+    /*! Fakes a click on the add test executable button. */
+    void clickAddTestExeField() const;
+
+    /*! Fakes a click on the remove test executable button.
+     *  Since multiple test-exe bars are typically shown, @p fieldIndex says
+     *  which one to remove. */
+    void clickRemoveTestExeField(int fieldIndex) const;
+
+    /*! Retrieves all the entries in the framework QComboBox */
+    QStringList frameworkComboBoxContents() const;
 
 private:
     ConfigWidget* m_config;

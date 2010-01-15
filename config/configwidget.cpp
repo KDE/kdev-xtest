@@ -1,6 +1,7 @@
 /*
  * This file is part of KDevelop
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2010 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -182,31 +183,6 @@ void ConfigWidget::setupButtons()
     addExecutableButton()->setToolButtonStyle( Qt::ToolButtonIconOnly );
     addExecutableButton()->setIcon(KIcon("list-add"));
     connect(addExecutableButton(), SIGNAL(clicked(bool)), SLOT(addTestExecutableField()));
-}
-
-void ConfigWidget::fto_clickExpandDetails() const
-{
-    expandDetailsButton()->toggle();
-}
-
-void ConfigWidget::fto_clickAddTestExeField() const
-{
-    addExecutableButton()->click();
-}
-
-void ConfigWidget::fto_clickRemoveTestExeField(int fieldIndex) const
-{
-    removeExecutableButton(fieldIndex)->click();
-}
-
-QStringList ConfigWidget::fto_frameworkComboBoxContents() const
-{
-    int nrof = frameworkBox()->count();
-    QStringList frameworks;
-    for (int i=0; i<nrof; ++i) {
-        frameworks << frameworkBox()->itemText(i);
-    }
-    return frameworks;
 }
 
 void ConfigWidget::appendFramework(const QString& framework)

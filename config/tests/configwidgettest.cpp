@@ -1,6 +1,7 @@
 /*
  * This file is part of KDevelop
  * Copyright 2008 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2010 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,12 +20,19 @@
  */
 
 #include "configwidgettest.h"
+
+#define protected public
+#define private public
+#include "../configwidget.h"
+#undef private
+#undef protected
+
 #include <QtTest/QTest>
 #include <QtTest/QTestKeyClicksEvent>
 #include <qtest_kde.h>
 #include "../../kasserts.h"
-#include "../configwidget.h"
 #include "fakedetailswidget.h"
+#include <QComboBox>
 #include <QLabel>
 #include <KUrlRequester>
 #include <qtoolbutton.h>
@@ -82,7 +90,7 @@ void ConfigWidgetTest::expandDetailsWidget()
     // click once on the expand detail button
     // the detail widget should be visible
 
-    m_config->fto_clickExpandDetails();
+    clickExpandDetails();
     assertDetailsExpanded();
 }
 
@@ -92,8 +100,8 @@ void ConfigWidgetTest::collapseDetailsWidget()
     // click twice on the expand detail button
     // now the details widget should be hidden again.
 
-    m_config->fto_clickExpandDetails();
-    m_config->fto_clickExpandDetails();
+    clickExpandDetails();
+    clickExpandDetails();
     assertDetailsCollapsed();
 }
 
@@ -117,7 +125,7 @@ void ConfigWidgetTest::addTestExeField()
 {
     // add a test-executable url-bar. the configwidget should now contain 1
 
-    m_config->fto_clickAddTestExeField();
+    clickAddTestExeField();
     assertTestExeFieldsShown(1);
 }
 
@@ -127,8 +135,8 @@ void ConfigWidgetTest::addTwoTestExeFields()
     // add a second and third test-executable url-bar. the configwidget
     // should now contain 2 of them.
 
-    m_config->fto_clickAddTestExeField();
-    m_config->fto_clickAddTestExeField();
+    clickAddTestExeField();
+    clickAddTestExeField();
     assertTestExeFieldsShown(2);
     assertChildWidgetsEnabled();
 }
@@ -139,8 +147,8 @@ void ConfigWidgetTest::removeFirstTestExeField()
     // remove the single present (by default) test executable field
     // now the config widget should contain zero test-exe url bars.
 
-    m_config->fto_clickAddTestExeField();
-    m_config->fto_clickRemoveTestExeField(0); // the index of the field to remove
+    clickAddTestExeField();
+    clickRemoveTestExeField(0); // the index of the field to remove
     assertTestExeFieldsShown(0);
 }
 
@@ -150,9 +158,9 @@ void ConfigWidgetTest::removeSecondTestExeField()
     // first add a second test exe bar, then remove it again.
     // now the config widget should contain a single test-exe url bar
 
-    m_config->fto_clickAddTestExeField();
-    m_config->fto_clickAddTestExeField();
-    m_config->fto_clickRemoveTestExeField(1); // the index of the field to remove
+    clickAddTestExeField();
+    clickAddTestExeField();
+    clickRemoveTestExeField(1); // the index of the field to remove
     assertTestExeFieldsShown(1);
 }
 
@@ -164,19 +172,19 @@ void ConfigWidgetTest::removeAllTestExeFieldsThenReAdd()
     // the configwidget should now contain 3 test exe bars.
 
     // add
-    m_config->fto_clickAddTestExeField();
-    m_config->fto_clickAddTestExeField();
-    m_config->fto_clickAddTestExeField();
+    clickAddTestExeField();
+    clickAddTestExeField();
+    clickAddTestExeField();
 
     // remove
-    m_config->fto_clickRemoveTestExeField(0);
-    m_config->fto_clickRemoveTestExeField(0);
-    m_config->fto_clickRemoveTestExeField(0);
+    clickRemoveTestExeField(0);
+    clickRemoveTestExeField(0);
+    clickRemoveTestExeField(0);
 
     // re-add
-    m_config->fto_clickAddTestExeField();
-    m_config->fto_clickAddTestExeField();
-    m_config->fto_clickAddTestExeField();
+    clickAddTestExeField();
+    clickAddTestExeField();
+    clickAddTestExeField();
 
     assertTestExeFieldsShown(3);
 }
@@ -186,7 +194,7 @@ void ConfigWidgetTest::noFrameworksComboBoxByDefault()
     // the test-framework selection box should be empty
     // by default
 
-    QStringList frameworks = m_config->fto_frameworkComboBoxContents();
+    QStringList frameworks = frameworkComboBoxContents();
     KVERIFY(frameworks.isEmpty());
 }
 
@@ -195,7 +203,7 @@ void ConfigWidgetTest::singleFrameworkComboBox()
     // append a single framework to the box
 
     m_config->appendFramework("FooBar");
-    QStringList frameworks = m_config->fto_frameworkComboBoxContents();
+    QStringList frameworks = frameworkComboBoxContents();
     KOMPARE(1, frameworks.count());
     KOMPARE(QString("FooBar"), frameworks[0]);
 }
@@ -206,7 +214,7 @@ void ConfigWidgetTest::multipleFrameworksComboBox()
 
     m_config->appendFramework("Foo");
     m_config->appendFramework("Bar");
-    QStringList frameworks = m_config->fto_frameworkComboBoxContents();
+    QStringList frameworks = frameworkComboBoxContents();
     KOMPARE(2, frameworks.count());
     KVERIFY(frameworks.contains("Foo"));
     KVERIFY(frameworks.contains("Bar"));
@@ -266,6 +274,31 @@ KUrlRequester* ConfigWidgetTest::fetchFirstTestExeRequester()
     Q_ASSERT(reqs.size() == 1);
     KUrlRequester* req = reqs[0];
     return req;
+}
+
+void ConfigWidgetTest::clickExpandDetails() const
+{
+    m_config->expandDetailsButton()->toggle();
+}
+
+void ConfigWidgetTest::clickAddTestExeField() const
+{
+    m_config->addExecutableButton()->click();
+}
+
+void ConfigWidgetTest::clickRemoveTestExeField(int fieldIndex) const
+{
+    m_config->removeExecutableButton(fieldIndex)->click();
+}
+
+QStringList ConfigWidgetTest::frameworkComboBoxContents() const
+{
+    int nrof = m_config->frameworkBox()->count();
+    QStringList frameworks;
+    for (int i=0; i<nrof; ++i) {
+        frameworks << m_config->frameworkBox()->itemText(i);
+    }
+    return frameworks;
 }
 
 QTEST_KDEMAIN( ConfigWidgetTest, GUI )
