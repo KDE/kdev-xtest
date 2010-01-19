@@ -114,6 +114,7 @@ void ConfigWidget::addTestExecutableField(const KUrl& testExecutable)
     req->setEnabled(m_allowUserModification);
     req->setWhatsThis(i18n("The path to this test executable."));
     QToolButton* remove = new QToolButton(this);
+    remove->setObjectName("removeButton");
     remove->setEnabled(m_allowUserModification);
     remove->setToolButtonStyle( Qt::ToolButtonIconOnly );
     remove->setIcon(KIcon("list-remove"));

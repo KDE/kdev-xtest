@@ -20,12 +20,7 @@
  */
 
 #include "configwidgettest.h"
-
-#define protected public
-#define private public
 #include "../configwidget.h"
-#undef private
-#undef protected
 
 #include <QtTest/QTest>
 #include <QtTest/QTestKeyClicksEvent>
@@ -34,6 +29,7 @@
 #include "fakedetailswidget.h"
 #include <QComboBox>
 #include <QLabel>
+#include <QLayout>
 #include <KUrlRequester>
 #include <qtoolbutton.h>
 #include <KFileDialog>
@@ -255,8 +251,8 @@ void ConfigWidgetTest::assertChildWidgetsDisabled()
     foreach(KUrlRequester* exe, exes) {
        KVERIFY(!exe->isEnabled());
     }
-    KVERIFY(!m_config->addExecutableButton()->isEnabled());
-    foreach(QToolButton* b, m_config->m_removeButtons) {
+    KVERIFY(!m_config->findChild<QToolButton*>("addExecutable")->isEnabled());
+    foreach(QToolButton* b, m_config->findChildren<QToolButton*>("removeButton")) {
        KVERIFY(!b->isEnabled());
     }
 }
@@ -281,30 +277,33 @@ KUrlRequester* ConfigWidgetTest::fetchFirstTestExeRequester()
 
 void ConfigWidgetTest::clickExpandDetails() const
 {
-    m_config->expandDetailsButton()->toggle();
+    m_config->findChild<QToolButton*>("expandDetails")->toggle();
 }
 
 void ConfigWidgetTest::clickAddTestExeField() const
 {
-    m_config->addExecutableButton()->click();
+    m_config->findChild<QToolButton*>("addExecutable")->click();
 }
 
 void ConfigWidgetTest::clickRemoveTestExeField(int fieldIndex) const
 {
-    m_config->removeExecutableButton(fieldIndex)->click();
+    QLayout* executableFieldsLayout = m_config->findChild<QLayout*>("scrollExeLayout");
+    QLayoutItem* removeItem = executableFieldsLayout->itemAt(fieldIndex)->layout()->itemAt(1);
+    QToolButton* removeExecutableButton = qobject_cast<QToolButton*>(removeItem->widget());
+    removeExecutableButton->click();
 }
 
 QComboBox* ConfigWidgetTest::frameworkComboBox() const
 {
-    return m_config->frameworkBox();
+    return m_config->findChild<QComboBox*>("frameworkSelection");
 }
 
 QStringList ConfigWidgetTest::frameworkComboBoxContents() const
 {
-    int nrof = m_config->frameworkBox()->count();
+    int nrof = frameworkComboBox()->count();
     QStringList frameworks;
     for (int i=0; i<nrof; ++i) {
-        frameworks << m_config->frameworkBox()->itemText(i);
+        frameworks << frameworkComboBox()->itemText(i);
     }
     return frameworks;
 }
