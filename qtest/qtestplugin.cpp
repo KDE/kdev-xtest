@@ -1,6 +1,7 @@
 /* KDevelop xUnit plugin
  *
  * Copyright 2008-2009 Manuel Breugelmans <mbr.nxi@gmail.com>
+ * Copyright 2010 Daniel Calviño Sánchez <danxuliu@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -67,6 +68,28 @@ using namespace KDevelop;
 using namespace QTest;
 using namespace Veritas;
 
+class QTestProjectFilter: public ProjectSelection::IProjectFilter
+{
+public:
+
+    QTestProjectFilter():
+        IProjectFilter(i18nc("@info:whatsthis Appended to the end of another WhatsThis help", 
+                             "<para>In this case, only projects configured to use \
+QTest framework can be selected.</para>"))
+    {
+    }
+
+    virtual bool canBeSelected(KDevelop::IProject* project)
+    {
+        if (project->projectConfiguration()->group("Veritas").readEntry("framework") != "QTest") {
+            return false;
+        }
+
+        return true;
+    }
+
+};
+
 QTestPlugin::QTestPlugin(QObject* parent, const QVariantList&)
         : IPlugin(QTestPluginFactory::componentData(), parent),
         m_dir(0),
@@ -94,7 +117,7 @@ QString QTestPlugin::name() const
 Veritas::TestRunner* QTestPlugin::createRunner()
 {
     QTest::ModelBuilder *testTreeBuilder = new QTest::ModelBuilder;
-    Veritas::TestRunner *runner = new TestRunner(this, testTreeBuilder);
+    Veritas::TestRunner *runner = new TestRunner(this, testTreeBuilder, new QTestProjectFilter());
     return runner;
 }
 
