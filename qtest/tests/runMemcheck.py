@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 # run valgrind's memory error checker on all tests.
 # filter uninteresting errors and known false positives
 # eg staticly initialized memory from libraries like libfontconfig
@@ -15,12 +16,29 @@ def garbage(line):
            not line.startswith('profiling:') and \
            line.find('</valgrindoutput>') # problem is that valgrind erroneously puts multiple of these end-document entries if processes are spawned _inside_ the exe under investigation
 
+def isValgrind3_5OrHigher():
+    process = Popen("valgrind --version", stdout=PIPE, shell=True)
+    process.wait()
+    valgrindOutput = process.stdout.read().strip()
+
+    import re, string
+    version = re.search("[0-9]+(.[0-9]+)*", valgrindOutput).group(0)
+    version = string.split(version, ".")
+
+    if map(int, version) < [3, 5]:
+        return False
+    else:
+        return True
+
 def memcheck(test):
     ''' run valgrind-memcheck on test in testdir. return xml output as string '''
     #proc = Popen("valgrind --tool=memcheck --leak-check=full --xml=yes " + test, stdout=PIPE, stderr=PIPE, shell=True, executable="/bin/bash")
     #proc.wait()
     #out = proc.stderr.readlines()
-    system("valgrind --tool=memcheck --leak-check=full --xml=yes --num-callers=75 " + test + " 1>/dev/null 2>.memcheck.tmp")
+    if isValgrind3_5OrHigher():
+        system("valgrind --tool=memcheck --leak-check=full --xml=yes --xml-file=.memcheck.tmp --num-callers=50 " + test + " 1>/dev/null")
+    else:
+        system("valgrind --tool=memcheck --leak-check=full --xml=yes --num-callers=75 " + test + " 1>/dev/null 2>.memcheck.tmp")
     out = open(".memcheck.tmp").readlines()
     remove(".memcheck.tmp")
     out = filter(garbage, out)
@@ -72,6 +90,8 @@ class BackTrace:
             if xml_child_data(frame, 'fn'): # filter anonymous frames out
                 self.stack.append(Frame(frame))
         self.what = xml_child_data(self.dom, 'what')
+        if self.dom.getElementsByTagName('xwhat').length > 0:
+            self.what = xml_child_data(self.dom.getElementsByTagName('xwhat')[0], 'text')
 
     def is_definitely_lost(self):
         return self.kind == u'Leak_DefinitelyLost'
