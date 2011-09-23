@@ -13,6 +13,7 @@ macro(kdev_add_test test_EXEC)
         ${QT_QTXML_LIBRARY}
         ${QT_QTGUI_LIBRARY}
         ${KDE4_KDECORE_LIBS}
+        ${KDE4_KIO_LIBS}
         ${KDEVVERITAS_LIBRARY}
         kdevqtest)
 endmacro(kdev_add_test)
