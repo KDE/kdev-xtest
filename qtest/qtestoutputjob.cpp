@@ -36,18 +36,6 @@
 using namespace KDevelop;
 using QTest::Executable;
 
-namespace
-{
-QTestOutputDelegate* delegate()
-{
-    static QTestOutputDelegate* s_delegate = 0;
-    if (s_delegate == 0) {
-        s_delegate = new QTestOutputDelegate;
-    }
-    return s_delegate;
-}
-}
-
 QTestOutputJob::QTestOutputJob(Executable* exe)
         : OutputJob(0), m_executable(exe)
 {}
@@ -59,8 +47,8 @@ void QTestOutputJob::start()
     setViewType(KDevelop::IOutputView::HistoryView);
     setStandardToolView(KDevelop::IOutputView::TestView);
     setBehaviours(KDevelop::IOutputView::AutoScroll | KDevelop::IOutputView::AllowUserClose);
-    setModel(new QTestOutputModel, KDevelop::IOutputView::TakeOwnership);
-    setDelegate(delegate(), KDevelop::IOutputView::KeepOwnership);
+    setModel(new QTestOutputModel);
+    setDelegate(new QTestOutputDelegate);
 
     startOutput();
     if (!m_executable->outFile().isEmpty()) {
