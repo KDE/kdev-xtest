@@ -306,6 +306,16 @@ void ModelBuilder::slotShowProgress(int minimum, int maximum, int value)
 
 void ModelBuilder::suiteBuilderFinished()
 {
+    //In Qt 4.8, in some specific cases QThread may emit "finished()" signal and
+    //still return true in "isRunning()", which will cause the
+    //"!m_runner->isRunning()" assert to fail. The assert, however, is fine, as
+    //it checks the expected behavior, so calling "wait()" is just a workaround
+    //for the problem in Qt 4.8. It has been fixed for Qt 5.0:
+    //http://qt.gitorious.org/qt/qtbase/commit/ec5e59b73c20a7dc6aec96c829f1e53c3fa58c07
+    if (m_runner->isRunning()) {
+        m_runner->wait();
+    }
+
     Q_ASSERT(m_runner);
     Q_ASSERT(m_reloading);
     Q_ASSERT(!m_runner->isRunning());
