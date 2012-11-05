@@ -1238,7 +1238,7 @@ void OutputParserTest::randomValidXML()
         }
     }
 
-    cout << "\n" << count << " tests succesful!" << endl;
+    cout << "\n" << count << " tests successful!" << endl;
     cout << "------------- OutputParser Random Stress Test  -------------" << endl;
     QCoreApplication::quit();
 }
@@ -1274,7 +1274,7 @@ void OutputParserTest::randomGarbageXML()
         }
     }
 
-    cout << "\n" << count << " tests succesful!" << endl;
+    cout << "\n" << count << " tests successful!" << endl;
     cout << "------------- OutputParser Random Garbage Test -------------" << endl;
     QCoreApplication::quit();
 }

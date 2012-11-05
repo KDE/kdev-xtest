@@ -102,7 +102,7 @@ void ModelBuilder::doReload(KDevelop::ProjectBaseItem* item)
     }
 }
 
-/*! Read test executables from project configuration. Returns the empty list if not succesful */
+/*! Read test executables from project configuration. Returns the empty list if not successful */
 QList<Veritas::TestExecutableInfo> fetchTestExesFromConfig(const KConfigGroup& veriConf, QString& failureMsg)
 {
     QList<Veritas::TestExecutableInfo> testExes;

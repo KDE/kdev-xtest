@@ -46,7 +46,7 @@ public slots:
      *  These pieces are iterativly fed to a OutputParser. 
      *
      *  It is not executed as part of the standard suite but through a
-     *  seperate executable, see parserstresstest.cpp */
+     *  separate executable, see parserstresstest.cpp */
     void randomValidXML();
 
     /*! Alike startRandomTest() but this feeds random XML with randomly 

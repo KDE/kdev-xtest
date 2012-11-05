@@ -35,9 +35,9 @@ class NewTestWizardFake : public NewTestWizard
 {
 public:
     QMap<QString, KUrl> m_folderForProject; // projectname x projectrootfolder
-                                            // used in the overriden rootFolderForPRoject method below
+                                            // used in the overridden rootFolderForPRoject method below
 protected:
-    // overriden from NewTestWizard to allow for proper unittesting
+    // overridden from NewTestWizard to allow for proper unittesting
     virtual KUrl rootFolderForProject(const QString& projectName) const {
 	return m_folderForProject[projectName];
     }
