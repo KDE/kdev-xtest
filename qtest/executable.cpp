@@ -70,7 +70,7 @@ Executable::Executable()
     m_parserTimeout->setInterval(150);
     connect(m_parserTimeout, SIGNAL(timeout()), SLOT(closeOutputFile()));
     m_proc = new KProcess(this);
-    connect(m_proc, SIGNAL(finished(int, QProcess::ExitStatus)),
+    connect(m_proc, SIGNAL(finished(int,QProcess::ExitStatus)),
             SLOT(morphXmlToText()));
     connect(m_proc, SIGNAL(error(QProcess::ProcessError)),
             SLOT(processError(QProcess::ProcessError)));
