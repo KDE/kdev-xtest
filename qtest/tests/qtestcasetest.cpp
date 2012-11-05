@@ -20,7 +20,6 @@
 
 #include "qtestcasetest.h"
 #include "../qtestmodelitems.h"
-#include "../qtestmodelitems.h"
 #include "../executable.h"
 
 #include "kdevtest.h"

@@ -21,7 +21,6 @@
 #include "casebuildertest.h"
 #include "kdevtest.h"
 #include "../qtestmodelitems.h"
-#include "../qtestmodelitems.h"
 #include "../executable.h"
 #include "../casebuilder.h"
 #include <KDebug>

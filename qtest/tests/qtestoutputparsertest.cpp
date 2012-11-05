@@ -22,7 +22,6 @@
 #include "qtestoutputparsertest.h"
 #include "../qtestoutputparser.h"
 #include "../qtestmodelitems.h"
-#include "../qtestmodelitems.h"
 
 #include "kdevtest.h"
 

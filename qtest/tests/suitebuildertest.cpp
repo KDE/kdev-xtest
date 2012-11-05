@@ -24,8 +24,6 @@
 #include "../casebuilder.h"
 #include "../suitebuilder.h"
 #include "../qtestmodelitems.h"
-#include "../qtestmodelitems.h"
-#include "../qtestmodelitems.h"
 #include <project/projectmodel.h>
 #include <veritas/test.h>
 #include <veritas/testexecutableinfo.h>
