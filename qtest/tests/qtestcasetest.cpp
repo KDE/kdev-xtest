@@ -74,7 +74,7 @@ void CaseTest::addCommands()
     KOMPARE(m_case->childCount(), 0);
     Command* c1 = new Command(someCmd(), m_case);
     m_case->addChild(c1);
-    Command* c2 = new Command(someCmd() + "2", m_case);
+    Command* c2 = new Command(someCmd() + '2', m_case);
     m_case->addChild(c2);
 
     KOMPARE(m_case->childCount(), 2);

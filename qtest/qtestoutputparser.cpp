@@ -317,7 +317,7 @@ void OutputParser::processDataTagEnd()
         return;
     }
 
-    m_result->setMessage("[" + m_cdataText + "] ");
+    m_result->setMessage('[' + m_cdataText + "] ");
 }
 
 void OutputParser::processDescriptionEnd()
