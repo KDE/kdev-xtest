@@ -225,7 +225,7 @@ ProjectExecutableTargetItem* findTargetFor(const TestExecutableInfo& test, const
     KUrl testCmd(test.workingDirectory().resolved(test.command()));
     QString testFile = testCmd.fileName();
     ProjectExecutableTargetItem* exe = 0;
-    if (testFile.endsWith(".shell")) {
+    if (testFile.endsWith(QLatin1String(".shell"))) {
         testFile.chop(6);
         testCmd = KUrl(testCmd.upUrl(), testFile);
         if (exeTargets.contains(testCmd)) {

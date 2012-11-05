@@ -37,9 +37,13 @@ void QTestOutputDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 {
     QStyleOptionViewItem opt = option;
     QString text = index.data().toString();
-    if (text.startsWith("PASS") || text.startsWith("XFAIL") || text.startsWith("QSKIP")) {
+    if (text.startsWith(QLatin1String("PASS")) ||
+            text.startsWith(QLatin1String("XFAIL")) ||
+            text.startsWith(QLatin1String("QSKIP"))) {
         opt.palette.setBrush(QPalette::Text, passBrush.brush(option.palette));
-    } else if (text.startsWith("FAIL") || text.startsWith("XPASS") || text.startsWith("QFATAL")) {
+    } else if (text.startsWith(QLatin1String("FAIL")) ||
+               text.startsWith(QLatin1String("XPASS")) ||
+               text.startsWith(QLatin1String("QFATAL"))) {
         opt.palette.setBrush(QPalette::Text, errorBrush.brush(option.palette));
     } else {
         opt.palette.setBrush(QPalette::Text, textBrush.brush(option.palette));

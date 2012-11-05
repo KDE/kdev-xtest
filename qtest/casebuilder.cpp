@@ -72,7 +72,8 @@ Case* CaseBuilder::construct()
     QStringList exeFunctionOut = m_executable->fetchFunctions();
     bool success = false;
     foreach(QString line, exeFunctionOut) { //krazy:exclude=foreach
-        if (line.endsWith("()") && !line.contains(" ")) {
+        if (line.endsWith(QLatin1String("()")) &&
+                !line.contains(QLatin1String(" "))) {
             // recognize this as a legit qtest function output line
             line.chop(2); // remove "()"
             Command* foo = new Command(line, caze);

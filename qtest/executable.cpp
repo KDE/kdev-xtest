@@ -309,7 +309,7 @@ void setLDLibDir(KProcess* qTestExe, ISettings* settings)
     QStringList env = QProcess::systemEnvironment();
     QString currentLDLib;
     foreach(const QString& str, env) {
-        if (str.startsWith("LD_LIBRARY_PATH")) {
+        if (str.startsWith(QLatin1String("LD_LIBRARY_PATH"))) {
             QStringList spl = str.split('=');
             if (spl.size() == 2) currentLDLib = spl[1];
         }
