@@ -117,7 +117,7 @@ private:
     struct TestInfo
     {
         TestInfo();
-        ~TestInfo();
+        virtual ~TestInfo();
         void reset();
 
         Veritas::Test* test;

@@ -31,7 +31,7 @@ class QTestOutputItem : public QStandardItem
 {
 public:
     explicit QTestOutputItem(const QString &text);
-    ~QTestOutputItem();
+    virtual ~QTestOutputItem();
     QString m_text;
 };
 
@@ -41,7 +41,7 @@ class QTestOutputModel : public QStandardItemModel, public KDevelop::IOutputView
 
 public:
     explicit QTestOutputModel(QObject *parent=0);
-    ~QTestOutputModel();
+    virtual ~QTestOutputModel();
 
     void activate(const QModelIndex &idx);
     QModelIndex nextHighlightIndex(const QModelIndex& currentIndex);
