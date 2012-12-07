@@ -52,7 +52,7 @@ public:
 class Settings : public ISettings
 {
 public:
-    Settings(KDevelop::IProject*);
+    explicit Settings(KDevelop::IProject*);
     virtual ~Settings();
     virtual bool printAsserts() const;
     virtual bool printSignals() const;

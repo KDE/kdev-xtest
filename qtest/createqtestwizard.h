@@ -36,7 +36,7 @@ class QXQTEST_EXPORT NewTestWizard : public QWizard
 {
 Q_OBJECT
 public:
-    NewTestWizard(QWidget* parent=0);
+    explicit NewTestWizard(QWidget* parent=0);
     virtual ~NewTestWizard();
 
     /*! Initialize the projects that can be selected in the wizard. */
@@ -79,7 +79,7 @@ class QXQTEST_EXPORT ClassDetailsPage : public QWizardPage
 {
 Q_OBJECT
     public:
-        ClassDetailsPage(QWidget* parent);
+        explicit ClassDetailsPage(QWidget* parent);
         virtual ~ClassDetailsPage();
 
        /*! Returns true if @p identifier is a valid C++ class name, false

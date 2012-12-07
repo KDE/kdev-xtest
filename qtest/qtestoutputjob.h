@@ -44,7 +44,7 @@ class QXQTEST_EXPORT QTestOutputJob : public KDevelop::OutputJob
     Q_OBJECT
 
 public:
-    QTestOutputJob(QTest::Executable*);
+    explicit QTestOutputJob(QTest::Executable*);
     virtual void start();
 
 protected:

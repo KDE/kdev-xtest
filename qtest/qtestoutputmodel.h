@@ -30,7 +30,7 @@ class QModelIndex;
 class QTestOutputItem : public QStandardItem
 {
 public:
-    QTestOutputItem(const QString &text);
+    explicit QTestOutputItem(const QString &text);
     ~QTestOutputItem();
     QString m_text;
 };

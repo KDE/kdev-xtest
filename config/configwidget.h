@@ -37,7 +37,7 @@ class ConfigWidget : public QWidget
 {
 Q_OBJECT
 public:
-    ConfigWidget(QWidget* parent=0);
+    explicit ConfigWidget(QWidget* parent=0);
     virtual ~ConfigWidget();
 
     /*! Initializes a framework specific details widget.
