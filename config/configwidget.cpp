@@ -135,7 +135,7 @@ void ConfigWidget::addTestExecutableField(const KUrl& testExecutable)
     repaint();
 }
 
-QComboBox* ConfigWidget::frameworkBox() const
+QComboBox* ConfigWidget::frameworkBox() const //krazy:exclude=qclasses
 {
     return m_ui->frameworkSelection;
 }

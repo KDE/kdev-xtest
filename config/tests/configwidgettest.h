@@ -79,7 +79,7 @@ private:
     void clickRemoveTestExeField(int fieldIndex) const;
 
     /*! Returns the framework QComboBox */
-    QComboBox* frameworkComboBox() const;
+    QComboBox* frameworkComboBox() const; //krazy:exclude=qclasses
 
     /*! Retrieves all the entries in the framework QComboBox */
     QStringList frameworkComboBoxContents() const;

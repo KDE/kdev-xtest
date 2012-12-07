@@ -99,7 +99,7 @@ private:
     QToolButton* addExecutableButton() const;
     QToolButton* removeExecutableButton(int fieldIndex) const;
     QLayout* executableFieldsLayout() const;
-    QComboBox* frameworkBox() const;
+    QComboBox* frameworkBox() const; //krazy:exclude=qclasses
     KUrl projectFolder() const;
     
 private:

@@ -293,7 +293,7 @@ void ConfigWidgetTest::clickRemoveTestExeField(int fieldIndex) const
     removeExecutableButton->click();
 }
 
-QComboBox* ConfigWidgetTest::frameworkComboBox() const
+QComboBox* ConfigWidgetTest::frameworkComboBox() const //krazy:exclude=qclasses
 {
     return m_config->findChild<QComboBox*>("frameworkSelection");
 }
