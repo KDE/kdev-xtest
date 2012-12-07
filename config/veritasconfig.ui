@@ -31,7 +31,7 @@ Note that you may not be able to add, edit or remove tests if the test framework
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout" >
         <item>
-         <widget class="QComboBox" name="frameworkSelection" >
+         <widget class="KComboBox" name="frameworkSelection" >
           <property name="toolTip" >
            <string>Test framework to use</string>
           </property>
