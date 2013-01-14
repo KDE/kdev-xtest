@@ -26,6 +26,7 @@ Comment[x-test]=xxQTestLib test runnerxx
 Name=QTest Runner
 Name[ca]=Executor de QTest
 Name[ca@valencia]=Executor de QTest
+Name[de]=QTest ausführen
 Name[en_GB]=QTest Runner
 Name[es]=Lanzador de QTest
 Name[et]=QTesti käivitaja
