@@ -5,6 +5,7 @@ Exec=blubb
 Comment=QTestLib test runner
 Comment[ca]=Executor de prova QTestLib
 Comment[ca@valencia]=Executor de prova QTestLib
+Comment[de]=QTestLib-Testausführung
 Comment[en_GB]=QTestLib test runner
 Comment[es]=Lanzador de pruebas QTestLib
 Comment[et]=QTestLibi testi käivitaja
